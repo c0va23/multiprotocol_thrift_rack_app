@@ -1,0 +1,3 @@
+class MultiprotocolThriftRackApp
+  # Your code goes here...
+end

@@ -1,0 +1,15 @@
+require: rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 2.2
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+

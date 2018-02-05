@@ -27,7 +27,7 @@ RSpec.describe MultiprotocolThriftRackApp do
     let(:request_env) do
       {
         Rack::REQUEST_METHOD => request_method,
-        Rack::CONTENT_TYPE => content_type,
+        'CONTENT_TYPE' => content_type,
         Rack::RACK_INPUT => request_body,
       }
     end
@@ -66,7 +66,7 @@ RSpec.describe MultiprotocolThriftRackApp do
         end
 
         it 'return valid content type header' do
-          expect(response.headers[Rack::CONTENT_TYPE]).to eq content_type
+          expect(response.headers['CONTENT_TYPE']).to eq content_type
         end
       end
 

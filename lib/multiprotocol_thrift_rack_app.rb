@@ -24,12 +24,14 @@ class MultiprotocolThriftRackApp
 
   private
 
+  CONTENT_TYPE_ENV = 'CONTENT_TYPE'
+
   def failure_response(error_message)
     Rack::Response.new(error_message, 400, {})
   end
 
   def find_protocol_factory(request)
-    content_type = request.get_header(Rack::CONTENT_TYPE)
+    content_type = request.get_header(CONTENT_TYPE_ENV)
     @logger.debug("Request Content-Type #{content_type}")
     @protocol_factory_map.each do |(protocol_factory, content_types)|
       next unless content_types.include?(content_type)
@@ -43,7 +45,7 @@ class MultiprotocolThriftRackApp
     Rack::Response.new(
       [],
       200,
-      Rack::CONTENT_TYPE => content_type,
+      CONTENT_TYPE_ENV => content_type,
     ) do |response|
       transport = Thrift::IOStreamTransport.new(request_body, response)
       protocol = protocol_factory.get_protocol(transport)

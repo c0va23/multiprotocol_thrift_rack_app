@@ -1,11 +1,17 @@
 require 'rack'
 require 'thrift'
+require 'logger'
 
 # Multiprotocol Thrift Rack application
 class MultiprotocolThriftRackApp
-  def initialize(processor, protocol_factory_map)
+  def initialize(
+        processor,
+        protocol_factory_map,
+        logger: Logger.new(STDERR, level: Logger::INFO)
+  )
     @processor = processor
     @protocol_factory_map = protocol_factory_map.freeze
+    @logger = logger
   end
 
   def call(env)
@@ -24,8 +30,10 @@ class MultiprotocolThriftRackApp
 
   def find_protocol_factory(request)
     content_type = request.get_header(Rack::CONTENT_TYPE)
+    @logger.debug("Request Content-Type #{content_type}")
     @protocol_factory_map.each do |(protocol_factory, content_types)|
       next unless content_types.include?(content_type)
+      @logger.debug("Match Content-Type for #{protocol_factory}")
       return protocol_factory, content_type
     end
     nil

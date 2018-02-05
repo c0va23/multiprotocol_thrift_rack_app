@@ -10,7 +10,7 @@ RSpec.describe MultiprotocolThriftRackApp do
       instance_double('Thrift::BinaryProtocolFactory')
     end
     let(:json_protocol_factory) do
-      nstance_double('Thrift::JsonProtocolFactory')
+      instance_double('Thrift::JsonProtocolFactory')
     end
 
     let(:protocol_factory_map) do
@@ -37,6 +37,10 @@ RSpec.describe MultiprotocolThriftRackApp do
 
       it 'return response with status 400' do
         expect(response.status).to eq 400
+      end
+
+      it 'return "Unknown Content-Type"' do
+        expect(response.body).to eq ['Unknown Content-Type']
       end
     end
 
@@ -71,6 +75,10 @@ RSpec.describe MultiprotocolThriftRackApp do
 
         it 'return response with status 400' do
           expect(response.status).to eq 400
+        end
+
+        it 'return "Not POST method" in body' do
+          expect(response.body).to eq ['Not POST method']
         end
       end
     end

@@ -10,16 +10,16 @@ class MultiprotocolThriftRackApp
 
   def call(env)
     request = Rack::Request.new(env)
-    return failure_response unless request.post?
+    return failure_response('Not POST method') unless request.post?
     protocol_factory, content_type = find_protocol_factory(request)
-    return failure_response if protocol_factory.nil?
+    return failure_response('Unknown Content-Type') if protocol_factory.nil?
     successful_response(request.body, protocol_factory, content_type)
   end
 
   private
 
-  def failure_response
-    Rack::Response.new([], 400, {})
+  def failure_response(error_message)
+    Rack::Response.new(error_message, 400, {})
   end
 
   def find_protocol_factory(request)

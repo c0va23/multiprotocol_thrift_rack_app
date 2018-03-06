@@ -45,7 +45,7 @@ class MultiprotocolThriftRackApp
     Rack::Response.new(
       [],
       200,
-      CONTENT_TYPE_ENV => content_type,
+      Rack::CONTENT_TYPE => content_type,
     ) do |response|
       transport = Thrift::IOStreamTransport.new(request_body, response)
       protocol = protocol_factory.get_protocol(transport)

@@ -20,7 +20,14 @@ RSpec.describe MultiprotocolThriftRackApp do
       }
     end
 
-    let(:rack_app) { described_class.new(processor, protocol_factory_map) }
+    let(:buffered) { false }
+    let(:rack_app) do
+      described_class.new(
+        processor,
+        protocol_factory_map,
+        buffered: buffered,
+      )
+    end
 
     let(:request_method) { Rack::POST }
     let(:request_body) { StringIO.new('custom request body') }
@@ -45,6 +52,16 @@ RSpec.describe MultiprotocolThriftRackApp do
     end
 
     shared_examples 'process POST request' do
+      shared_examples 'success process' do
+        it 'return response with status 200' do
+          expect(response.status).to eq 200
+        end
+
+        it 'return valid content type header' do
+          expect(response.headers[Rack::CONTENT_TYPE]).to eq content_type
+        end
+      end
+
       context 'when reqeust with POST method' do
         let(:request_method) { Rack::POST }
 
@@ -61,13 +78,31 @@ RSpec.describe MultiprotocolThriftRackApp do
           allow(processor).to receive(:process).with(protocol, protocol)
         end
 
-        it 'return response with status 200' do
-          expect(response.status).to eq 200
+        include_examples 'success process'
+      end
+
+      context 'when reqeust with POST method and buffered' do
+        let(:buffered) { true }
+        let(:request_method) { Rack::POST }
+
+        before do
+          raw_transport = instance_double('Transport')
+          transport = instance_double('BufferedTransport')
+          protocol = instance_double('Thrift::BaseProtocol')
+
+          allow(Thrift::IOStreamTransport).to receive(:new)
+            .with(request_body, kind_of(Rack::Response))
+            .and_return(raw_transport)
+          allow(Thrift::BufferedTransport).to receive(:new)
+            .with(raw_transport)
+            .and_return(transport)
+          allow(protocol_factory).to receive(:get_protocol)
+            .with(transport)
+            .and_return(protocol)
+          allow(processor).to receive(:process).with(protocol, protocol)
         end
 
-        it 'return valid content type header' do
-          expect(response.headers[Rack::CONTENT_TYPE]).to eq content_type
-        end
+        include_examples 'success process'
       end
 
       context 'when request with GET method' do

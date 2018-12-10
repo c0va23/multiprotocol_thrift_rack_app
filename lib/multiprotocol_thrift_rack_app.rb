@@ -7,11 +7,12 @@ class MultiprotocolThriftRackApp
   def initialize(
         processor,
         protocol_factory_map,
-        logger: Logger.new(STDERR, level: Logger::INFO)
-  )
+        logger: Logger.new(STDERR, level: Logger::INFO),
+        buffered: false)
     @processor = processor
     @protocol_factory_map = protocol_factory_map.freeze
     @logger = logger
+    @buffered = buffered
   end
 
   def call(env)
@@ -47,7 +48,8 @@ class MultiprotocolThriftRackApp
       200,
       Rack::CONTENT_TYPE => content_type,
     ) do |response|
-      transport = Thrift::IOStreamTransport.new(request_body, response)
+      raw_transport = Thrift::IOStreamTransport.new(request_body, response)
+      transport = @buffered ? Thrift::BufferedTransport.new(raw_transport) : raw_transport
       protocol = protocol_factory.get_protocol(transport)
       @processor.process(protocol, protocol)
     end
